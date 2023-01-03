@@ -4,6 +4,8 @@
 
 import re
 
+from typing import Any, Union
+
 import requests
 
 from flask import Flask, abort, make_response, redirect
@@ -16,37 +18,49 @@ GITLAB_UPLOAD = "https://gitlab.com/{}/{}/uploads/{}"
 app = Flask(__name__)
 
 
-def validate(*args):
+# FIXME: too strict?
+def validate(*args: str) -> bool:
     for arg in args:
         if not re.fullmatch(r"[a-zA-Z0-9._-]+", arg):
-            raise ValueError(f"invalid: {arg!r}")
+            return False
+    return True
 
 
-@app.route("/gitlab/<namespace>/<project>/<release>/<asset>")
-def gitlab_release(namespace, project, release, asset):
-    try:
-        validate(namespace, project, release, asset)
-    except ValueError:
-        abort(400)
+def gitlab_release(namespace: str, project: str, release: str,
+                   asset: str) -> Union[int, str]:
+    if not validate(namespace, project, release, asset):
+        return 400
     url = GITLAB_RELEASE.format(namespace, project, release)
     try:
         req = requests.get(url, timeout=3)
+        if req.status_code == 404:
+            return 404
         req.raise_for_status()
         data = req.json()
+        asset_url: str
         for asset_url in (a["url"] for a in data["assets"]["links"]):
             if asset_url.endswith("/" + asset):
-                return redirect(asset_url)
+                return asset_url
         for upload in re.findall(r"\(/uploads/([0-9a-f]{32}/[^/)]+)\)", data["description"]):
             if upload.endswith("/" + asset):
                 asset_url = GITLAB_UPLOAD.format(namespace, project, upload)
-                return redirect(asset_url)
-        abort(404)
+                return asset_url
+        return 404
     except (IndexError, KeyError, requests.RequestException):
-        abort(400)
+        return 400
+
+
+@app.route("/gitlab/<namespace>/<project>/<release>/<asset>")
+def r_gitlab(namespace: str, project: str, release: str, asset: str) -> Any:
+    result = gitlab_release(namespace, project, release, asset)
+    if isinstance(result, int):
+        abort(result)
+    else:
+        return redirect(result)
 
 
 @app.route("/robots.txt")
-def robots():
+def r_robots() -> Any:
     resp = make_response("User-agent: *\nDisallow: /\n")
     resp.mimetype = "text/plain"
     return resp
