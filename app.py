@@ -23,3 +23,8 @@ def gitlab_release(namespace, project, release, asset):
     except (IndexError, KeyError, requests.RequestException):
         pass
     abort(500)
+
+
+@app.route("/robots.txt")
+def robots():
+    return "User-agent: *\nDisallow: /\n"
