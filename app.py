@@ -4,7 +4,7 @@
 
 import requests
 
-from flask import Flask, abort, redirect
+from flask import Flask, abort, make_response, redirect
 
 GITLAB_RELEASE = "https://gitlab.com/api/v4/projects/{}%2F{}/releases/{}"
 
@@ -27,4 +27,6 @@ def gitlab_release(namespace, project, release, asset):
 
 @app.route("/robots.txt")
 def robots():
-    return "User-agent: *\nDisallow: /\n"
+    resp = make_response("User-agent: *\nDisallow: /\n")
+    resp.mimetype = "text/plain"
+    return resp
