@@ -24,12 +24,19 @@ API: `/codeberg/<namespace>/<project>/<release-tag>/<filename>`
 
 API: `/gitlab/<namespace>/<project>/<release>/<filename>`
 
-`filename` must match the file name of one of the asset links or a file upload
-in the release description.
+`filename` must match the filename of one of the asset links or a file upload in
+the release description.
 
-## Forges planned to be supported
+### NotABug
 
-* NotABug
+API: `/notabug/<namespace>/<project>/<release>/<filename>`
+
+`filename` must match the filename of one of the downloads.
+
+NB: there does not seem to be a JSON API for releases like for the other forges,
+so the project's releases HTML page is scraped (which could break if the HTML
+changes); pagination is currently not supported (so the release is only found if
+it is on the first page).
 
 ## Forges that will not be supported
 
