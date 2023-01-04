@@ -39,10 +39,11 @@ NOTABUG_ATTACHMENT = "https://{}/attachments/{}"
 NOTABUG_ATTACHMENT_RX = re.compile(r'href="/attachments/([0-9a-f-]+)"[^>]*>([^<]+)<')
 NOTABUG_DOWNLOADS_RX = re.compile(r'<div class="download">(.*?)</div>', re.S)
 
-RATELIMIT = os.environ.get("FDROID_RELEASE_REDIRECTOR_RATELIMIT", "").strip()
-FORWARDED = os.environ.get("FDROID_RELEASE_REDIRECTOR_FORWARDED", "").strip()
+ENV_PREFIX = "FDROID_RELEASE_REDIRECTOR"
+RATELIMIT = os.environ.get(f"{ENV_PREFIX}_RATELIMIT") in ("1", "yes", "true")
+FORWARDED = os.environ.get(f"{ENV_PREFIX}_FORWARDED") in ("1", "yes", "true")
 
-if FORWARDED in ("1", "yes", "true"):
+if FORWARDED:
     def get_remote_address() -> str:
         return request.access_route[-1]
 else:
@@ -53,8 +54,8 @@ app = Flask(__name__)
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=[RATELIMIT] if RATELIMIT else None,
-    enabled=bool(RATELIMIT),
+    default_limits=["60/hour"],
+    enabled=RATELIMIT,
     storage_uri="memory://",
     strategy="fixed-window",
 )
@@ -144,6 +145,7 @@ def r_codeberg(namespace: str, project: str, release: str, asset: str) -> Any:
 
 
 @app.route("/gitlab/<namespace>/<project>/<release>/<asset>")
+@limiter.limit("120/hour")
 def r_gitlab(namespace: str, project: str, release: str, asset: str) -> Any:
     result = gitlab_release(GITLAB, namespace, project, release, asset)
     if isinstance(result, int):
