@@ -9,9 +9,8 @@ from typing import Any, Union
 
 import requests
 
-from flask import Flask, abort, make_response, redirect
+from flask import Flask, abort, make_response, redirect, request
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 HOMEPAGE = "https://github.com/obfusk/fdroid-release-redirector"
 
@@ -41,6 +40,14 @@ NOTABUG_ATTACHMENT_RX = re.compile(r'href="/attachments/([0-9a-f-]+)"[^>]*>([^<]
 NOTABUG_DOWNLOADS_RX = re.compile(r'<div class="download">(.*?)</div>', re.S)
 
 RATELIMIT = os.environ.get("FDROID_RELEASE_REDIRECTOR_RATELIMIT", "").strip()
+FORWARDED = os.environ.get("FDROID_RELEASE_REDIRECTOR_FORWARDED", "").strip()
+
+if FORWARDED in ("1", "yes", "true"):
+    def get_remote_address() -> str:
+        return request.access_route[-1]
+else:
+    from flask_limiter.util import get_remote_address
+
 
 app = Flask(__name__)
 limiter = Limiter(
