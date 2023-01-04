@@ -77,11 +77,11 @@ def gitea_release(host: str, namespace: str, project: str, release_tag: str,
         return 400
     url = GITEA_RELEASE.format(host, namespace, project, release_tag)
     try:
-        req = requests.get(url, timeout=3)
-        if req.status_code == 404:
+        r = requests.get(url, timeout=3)
+        if r.status_code == 404:
             return 404
-        req.raise_for_status()
-        data = req.json()
+        r.raise_for_status()
+        data = r.json()
         for asset_data in data["assets"]:
             if asset_data["name"] == asset:
                 asset_url: str = asset_data["browser_download_url"]
@@ -97,11 +97,11 @@ def gitlab_release(host: str, namespace: str, project: str, release: str,
         return 400
     url = GITLAB_RELEASE.format(host, namespace, project, release)
     try:
-        req = requests.get(url, timeout=3)
-        if req.status_code == 404:
+        r = requests.get(url, timeout=3)
+        if r.status_code == 404:
             return 404
-        req.raise_for_status()
-        data = req.json()
+        r.raise_for_status()
+        data = r.json()
         asset_url: str
         for asset_url in (a["url"] for a in data["assets"]["links"]):
             if asset_url.endswith("/" + asset):
@@ -123,13 +123,13 @@ def notabug_release(host: str, namespace: str, project: str, release: str,
     url = NOTABUG_RELEASES.format(host, namespace, project)
     release_zip = NOTABUG_RELEASE_ZIP.format(namespace, project, release)
     try:
-        req = requests.get(url, timeout=3)
-        if req.status_code == 404:
+        r = requests.get(url, timeout=3)
+        if r.status_code == 404:
             return 404
-        req.raise_for_status()
-        for dl_m in NOTABUG_DOWNLOADS_RX.finditer(req.text):
+        r.raise_for_status()
+        for dl_m in NOTABUG_DOWNLOADS_RX.finditer(r.text):
             if release_zip in dl_m[1]:
-                if url_m := NOTABUG_ATTACHMENT_RX.search(dl_m[1]):
+                for url_m in NOTABUG_ATTACHMENT_RX.finditer(dl_m[1]):
                     if url_m[2] == asset:
                         return NOTABUG_ATTACHMENT.format(host, url_m[1])
         return 404
