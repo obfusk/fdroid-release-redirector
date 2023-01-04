@@ -14,11 +14,21 @@ Location: https://example.com/some.apk
 
 ## Currently supported forges
 
-* GitLab
+### Codeberg
+
+API: `/codeberg/<namespace>/<project>/<release-tag>/<filename>`
+
+`filename` must match the `name` of one of the assets.
+
+### GitLab
+
+API: `/gitlab/<namespace>/<project>/<release>/<filename>`
+
+`filename` must match the file name of one of the asset links or a file upload
+in the release description.
 
 ## Forges planned to be supported
 
-* Codeberg
 * NotABug
 
 ## Forges that will not be supported
