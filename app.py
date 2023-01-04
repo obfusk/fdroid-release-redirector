@@ -2,6 +2,7 @@
 # SPDX-FileCopyrightText: 2023 FC Stegerman <flx@obfusk.net>
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
+import os
 import re
 
 from typing import Any, Union
@@ -9,6 +10,8 @@ from typing import Any, Union
 import requests
 
 from flask import Flask, abort, make_response, redirect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 HOMEPAGE = "https://github.com/obfusk/fdroid-release-redirector"
 
@@ -37,7 +40,17 @@ NOTABUG_ATTACHMENT = "https://{}/attachments/{}"
 NOTABUG_ATTACHMENT_RX = re.compile(r'href="/attachments/([0-9a-f-]+)"[^>]*>([^<]+)<')
 NOTABUG_DOWNLOADS_RX = re.compile(r'<div class="download">(.*?)</div>', re.S)
 
+RATELIMIT = os.environ.get("FDROID_RELEASE_REDIRECTOR_RATELIMIT", "").strip()
+
 app = Flask(__name__)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[RATELIMIT] if RATELIMIT else None,
+    enabled=bool(RATELIMIT),
+    storage_uri="memory://",
+    strategy="fixed-window",
+)
 
 
 # FIXME: too strict?
@@ -142,11 +155,13 @@ def r_notabug(namespace: str, project: str, release: str, asset: str) -> Any:
 
 
 @app.route("/")
+@limiter.exempt
 def r_root() -> Any:
     return redirect(HOMEPAGE)
 
 
 @app.route("/robots.txt")
+@limiter.exempt
 def r_robots() -> Any:
     resp = make_response("User-agent: *\nDisallow: /\n")
     resp.mimetype = "text/plain"

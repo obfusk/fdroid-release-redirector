@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        python3 -m pip install Flask requests
+        python3 -m pip install Flask Flask-Limiter requests
         python3 -m pip install flake8 pylint mypy types-requests
     - name: Test
       run: make test
