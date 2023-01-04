@@ -51,6 +51,8 @@ else:
 
 
 app = Flask(__name__)
+
+# NB: in-memory storage may require WEB_CONCURRENCY=1
 limiter = Limiter(
     get_remote_address,
     app=app,
