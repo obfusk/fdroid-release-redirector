@@ -10,6 +10,8 @@ import requests
 
 from flask import Flask, abort, make_response, redirect
 
+HOMEPAGE = "https://github.com/obfusk/fdroid-release-redirector"
+
 CODEBERG = "codeberg.org"
 GITLAB = "gitlab.com"
 NOTABUG = "notabug.org"
@@ -137,6 +139,11 @@ def r_notabug(namespace: str, project: str, release: str, asset: str) -> Any:
         abort(result)
     else:
         return redirect(result)
+
+
+@app.route("/")
+def r_root() -> Any:
+    return redirect(HOMEPAGE)
 
 
 @app.route("/robots.txt")

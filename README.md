@@ -1,3 +1,9 @@
+<!-- SPDX-FileCopyrightText: 2023 FC Stegerman <flx@obfusk.net> -->
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+
+[![CI](https://github.com/obfusk/fdroid-release-redirector/workflows/CI/badge.svg)](https://github.com/obfusk/fdroid-release-redirector/actions?query=workflow%3ACI)
+[![AGPLv3+](https://img.shields.io/badge/license-AGPLv3+-blue.svg)](https://www.gnu.org/licenses/agpl-3.0.html)
+
 # fdroid-release-redirector
 
 Redirector for code forges that don't have stable URLs for release
@@ -12,7 +18,7 @@ $ curl -sI $SERVER/gitlab/$NAMESPACE/$PROJECT/$RELEASE/release.apk | grep ^Locat
 Location: https://example.com/some.apk
 ```
 
-## Currently supported forges
+## Supported forges
 
 ### Codeberg
 
@@ -38,6 +44,12 @@ so the project's releases HTML page is scraped (which could break if the HTML
 changes); pagination is currently not supported (so the release is only found if
 it is on the first page).
 
-## Forges that will not be supported
+## Unsupported forges
 
 * GitHub (no need, since release assets already have stable URLs)
+
+## License
+
+[![AGPLv3+](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)
+
+<!-- vim: set tw=70 sw=2 sts=2 et fdm=marker : -->
