@@ -18,9 +18,25 @@ $ curl -sI $SERVER/gitlab/$NAMESPACE/$PROJECT/$RELEASE/release.apk | grep ^Locat
 Location: https://example.com/some.apk
 ```
 
+## F-Droid reproducible builds
+
+When using `Binaries:` for F-Droid reproducible builds, you can use something
+like this in the `metadata/your.app.id.yml`:
+
+```yaml
+Binaries: https://fdroid-release-redirector.herokuapp.com/gitlab/yourusername/yourapp/v%v/app-release.apk
+```
+
+NB: replace forge (`gitlab`), username (`yourusername`), repository (`yourapp`),
+tag format, and filename (`app-release.apk`) with appropriate values.
+
 ## Supported forges
 
 ### Codeberg
+
+NB: it turns out that Codeberg already has stable URLs, even though the download
+page uses non-stable ones:
+`https://codeberg.org/<namespace>/<project>/releases/download/<tag>/<filename>`.
 
 API: `/codeberg/<namespace>/<project>/<release-tag>/<filename>`
 
